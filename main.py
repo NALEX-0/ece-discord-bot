@@ -90,7 +90,7 @@ async def check_for_announcements():
             continue
 
         date = datetime.strptime(row_cols[0].text, "%d/%m/%Y")
-        if today - date > timedelta(days=10):
+        if today - date > timedelta(days=1):
             break
 
         id = int(row_cols[0].find("a", href=True)["href"].replace(
@@ -151,8 +151,8 @@ async def check_for_announcements():
         except Exception as e:
             logging.error(f"Couldn't send message! {e}")
 
-    with open("data.pickle", "wb+") as handle:
-        pickle.dump(announcements, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # with open("data.pickle", "wb+") as handle:
+    #     pickle.dump(announcements, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 @tasks.loop(minutes=60)
@@ -174,12 +174,12 @@ async def on_ready():
 if __name__ == "__main__":
     logging.basicConfig(encoding="utf-8", level=logging.INFO)
 
-    try:
-        with open("data.pickle", "rb+") as handle:
-            announcements = pickle.load(handle)
-            print(announcements)
+    # try:
+    #     with open("data.pickle", "rb+") as handle:
+    #         announcements = pickle.load(handle)
+    #         print(announcements)
 
-    except (OSError, IOError) as _:
-        logging.info("pickle file not found")
+    # except (OSError, IOError) as _:
+    #     logging.info("pickle file not found")
 
     client.run(TOKEN)
