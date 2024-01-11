@@ -20,7 +20,8 @@ from discord.ext import commands, tasks
 
 
 TOKEN = os.environ["TOKEN"]
-DISCORD_CHANNEL_ID = int(1151415085802201139)
+DISCORD_CHANNEL_ID = int(1194940888284135434)
+DISCROD_SAVE_CHANNEL_ID = int(1194940663784034444)
 
 URL = "https://www.ece.ntua.gr/gr/archive"
 URL_PREFIX = "https://www.ece.ntua.gr"
@@ -158,7 +159,7 @@ async def check_for_announcements():
         with open("data.pickle", "wb+") as handle:
             pickle.dump(announcements, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
-        channel = client.get_channel(1194927489697456218)
+        channel = client.get_channel(DISCROD_SAVE_CHANNEL_ID)
         await channel.send(file = discord.File("data.pickle"))
 
 
@@ -175,7 +176,7 @@ async def change_status():
 async def on_ready():
     logging.info(f"{client.user} has connected to Discord!")
 
-    channel = client.get_channel(1194927489697456218)
+    channel = client.get_channel(DISCROD_SAVE_CHANNEL_ID)
     message = await channel.fetch_message(channel.last_message_id)
     print(message.attachments)
 
