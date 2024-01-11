@@ -72,6 +72,8 @@ client = discord.Client(intents=intents)
 async def check_for_announcements():
     logging.info(f"Scrapping {URL}")
 
+    dirtybit = False
+
     r = requests.get(url=URL)
     if r.status_code != 200:
         logging.error(f"Unable to scrap ece.ntua.gr Got: {r.status_code}")
@@ -90,7 +92,7 @@ async def check_for_announcements():
             continue
 
         date = datetime.strptime(row_cols[0].text, "%d/%m/%Y")
-        if today - date > timedelta(days=1):
+        if today - date > timedelta(days=10):
             break
 
         id = int(row_cols[0].find("a", href=True)["href"].replace(
@@ -147,12 +149,18 @@ async def check_for_announcements():
         try:
             await discord_channel.send(embed=embed)
             announcements += (id, )
+            dirtybit = True
 
         except Exception as e:
             logging.error(f"Couldn't send message! {e}")
 
-    # with open("data.pickle", "wb+") as handle:
-    #     pickle.dump(announcements, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    if dirtybit:
+        with open("data.pickle", "wb+") as handle:
+            pickle.dump(announcements, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        
+        channel = client.get_channel(1194927489697456218)
+        await channel.send(file = discord.File("data.pickle"))
+
 
 
 @tasks.loop(minutes=60)
@@ -167,19 +175,26 @@ async def change_status():
 async def on_ready():
     logging.info(f"{client.user} has connected to Discord!")
 
+    channel = client.get_channel(1194927489697456218)
+    message = await channel.fetch_message(channel.last_message_id)
+    print(message.attachments)
+
+    if message.attachments:
+        await message.attachments[0].save(fp="data.pickle")
+        print("Retrieved internal state")
+        try:
+            with open("data.pickle", "rb+") as handle:
+                global announcements
+                announcements = pickle.load(handle)
+                print(announcements)
+    
+        except (OSError, IOError) as _:
+            logging.info("pickle file not found")
+
     check_for_announcements.start()
     change_status.start()
 
 
 if __name__ == "__main__":
     logging.basicConfig(encoding="utf-8", level=logging.INFO)
-
-    # try:
-    #     with open("data.pickle", "rb+") as handle:
-    #         announcements = pickle.load(handle)
-    #         print(announcements)
-
-    # except (OSError, IOError) as _:
-    #     logging.info("pickle file not found")
-
     client.run(TOKEN)
