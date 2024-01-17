@@ -166,7 +166,7 @@ async def check_for_announcements():
 
 @tasks.loop(minutes=60)
 async def change_status():
-    c = ["Octave", "LTSpice", "Putty", "MPLAB-X", "grader"]
+    c = ["Octave", "LTSpice", "Putty", "MPLAB-X", "grader", "Περιμένω το 242"]
 
     rand_activity = choice(c)
     await client.change_presence(activity=discord.Game(name=rand_activity))
