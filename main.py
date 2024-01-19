@@ -20,7 +20,7 @@ from discord.ext import commands, tasks
 
 
 TOKEN = os.environ["TOKEN"]
-DISCORD_CHANNEL_ID = int(1194940888284135434)
+DISCORD_CHANNEL_ID = int(947628331828920321)
 DISCROD_SAVE_CHANNEL_ID = int(1194940663784034444)
 
 URL = "https://www.ece.ntua.gr/gr/archive"
