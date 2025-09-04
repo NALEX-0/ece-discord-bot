@@ -1,5 +1,5 @@
 beautifulsoup4==4.12.2
 bs4>=0.0.1
-discord.py==2.3.2
-lxml==4.9.3
-requests==2.32.4
+discord.py==2.6.3
+lxml==6.0.1
+requests==2.32.5
