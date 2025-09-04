@@ -1,6 +1,6 @@
-'''
+"""
 Author: Stavros Avramidis
-'''
+"""
 
 import asyncio
 import logging
@@ -21,15 +21,15 @@ from discord.ext import commands, tasks
 
 TOKEN = os.environ["TOKEN"]
 DISCORD_CHANNEL_ID = int(947628331828920321)
-DISCROD_SAVE_CHANNEL_ID = int(1194940663784034444)
+DISCORD_SAVE_CHANNEL_ID = int(1194940663784034444)
 
 URL = "https://www.ece.ntua.gr/gr/archive"
 URL_PREFIX = "https://www.ece.ntua.gr"
 
 CATEGORIES = {
-    "Προπτυχιακά": 0x5887ba,
-    "Προγράμματα": 0xef775e,
-    "Εγγραφές": 0x96aa44,
+    "Προπτυχιακά": 0x5887BA,
+    "Προγράμματα": 0xEF775E,
+    "Εγγραφές": 0x96AA44,
     "ΣΗΜΜΥ": 0xFFFFFF,
 }
 
@@ -46,16 +46,16 @@ SHMMY_KEYWORDS = (
     "ΔΕΝ?",
     "ΑΠΟΦΑΣΗ",
     "ΓΣ ΣΗΜΜΥ",
-    "ΦΟΙΤΗΤ.*"
+    "ΦΟΙΤΗΤ.*",
 )
 
-SHMMY_KEYWORDS_PATTERN = r'\b(?:' + '|'.join(SHMMY_KEYWORDS) + r')\b'
+SHMMY_KEYWORDS_PATTERN = r"\b(?:" + "|".join(SHMMY_KEYWORDS) + r")\b"
 
-REMOVE_ACCENTS_FILTER = {ord('\N{COMBINING ACUTE ACCENT}'): None}
+REMOVE_ACCENTS_FILTER = {ord("\N{COMBINING ACUTE ACCENT}"): None}
 
 
 def greek_to_upper(s: str):
-    return ud.normalize('NFD', s).upper().translate(REMOVE_ACCENTS_FILTER)
+    return ud.normalize("NFD", s).upper().translate(REMOVE_ACCENTS_FILTER)
 
 
 def has_shmmy_keywords(s: str):
@@ -63,7 +63,6 @@ def has_shmmy_keywords(s: str):
     match = re.search(SHMMY_KEYWORDS_PATTERN, s, flags=re.IGNORECASE)
 
     return match is not None
-
 
 
 announcements = ()
@@ -99,8 +98,9 @@ async def check_for_announcements():
         if today - date > timedelta(days=10):
             break
 
-        id = int(row_cols[0].find("a", href=True)["href"].replace(
-            "/gr/announcement/", ""))
+        id = int(
+            row_cols[0].find("a", href=True)["href"].replace("/gr/announcement/", "")
+        )
         cat = row_cols[3].text
 
         global announcements
@@ -111,8 +111,7 @@ async def check_for_announcements():
         announcement["Title"] = row_cols[1].text
         announcement["Cat"] = cat
         announcement["ID"] = id
-        announcement["URL"] = URL_PREFIX + row_cols[0].find("a",
-                                                            href=True)["href"]
+        announcement["URL"] = URL_PREFIX + row_cols[0].find("a", href=True)["href"]
 
         if cat == "ΣΗΜΜΥ" and not has_shmmy_keywords(announcement["Title"]):
             continue
@@ -122,8 +121,7 @@ async def check_for_announcements():
         #
         r2 = requests.get(url=announcement["URL"])
         if r2.status_code != 200:
-            logging.error(
-                f"Unable to scrap announcement's page Got: {r2.status_code}")
+            logging.error(f"Unable to scrap announcement's page Got: {r2.status_code}")
             return
 
         soup2 = BeautifulSoup(r2.content, "lxml")
@@ -141,18 +139,17 @@ async def check_for_announcements():
             title=announcement["Title"],
             url=announcement["URL"],
             description=f"**{announcement['Cat']}**\n\n{desc}",
-            color=CATEGORIES[announcement['Cat']],
+            color=CATEGORIES[announcement["Cat"]],
         )
         embed.set_author(
             name="Μια ανακοίνωση να κάνουμε!",
-            icon_url=
-            "https://cdn.discordapp.com/app-assets/1151413211904606290/1151774722124689470.png",
+            icon_url="https://cdn.discordapp.com/app-assets/1151413211904606290/1151774722124689470.png",
         )
         embed.set_footer(text=str(announcement["Date"]))
 
         try:
             await discord_channel.send(embed=embed)
-            announcements += (id, )
+            announcements += (id,)
             dirtybit = True
 
         except Exception as e:
@@ -161,10 +158,9 @@ async def check_for_announcements():
     if dirtybit:
         with open("data.pickle", "wb+") as handle:
             pickle.dump(announcements, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        
-        channel = client.get_channel(DISCROD_SAVE_CHANNEL_ID)
-        await channel.send(file = discord.File("data.pickle"))
 
+        channel = client.get_channel(DISCORD_SAVE_CHANNEL_ID)
+        await channel.send(file=discord.File("data.pickle"))
 
 
 @tasks.loop(minutes=60)
@@ -179,7 +175,7 @@ async def change_status():
 async def on_ready():
     logging.info(f"{client.user} has connected to Discord!")
 
-    channel = client.get_channel(DISCROD_SAVE_CHANNEL_ID)
+    channel = client.get_channel(DISCORD_SAVE_CHANNEL_ID)
     message = await channel.fetch_message(channel.last_message_id)
     print(message.attachments)
 
@@ -191,7 +187,7 @@ async def on_ready():
                 global announcements
                 announcements = pickle.load(handle)
                 print(announcements)
-    
+
         except (OSError, IOError) as _:
             logging.info("pickle file not found")
 
