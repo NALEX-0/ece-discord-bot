@@ -47,6 +47,7 @@ SHMMY_KEYWORDS = (
     "ΑΠΟΦΑΣΗ",
     "ΓΣ ΣΗΜΜΥ",
     "ΦΟΙΤΗΤ.*",
+    "ΗΜΕΡΟΛΟΓΙΟ",
 )
 
 SHMMY_KEYWORDS_PATTERN = r"\b(?:" + "|".join(SHMMY_KEYWORDS) + r")\b"
